@@ -26,9 +26,9 @@ order.
 
 ### Forewarning
 
-[liability here] D-Shield, it's community, and it's contributors; can not take any
-responsibility for any undesired behavior or outcomes otherwise
-resulting in use of in use of this tool and project.
+[liability here] D-Shield, it's community, and it's contributors; can
+not take any responsibility for any undesired behavior or outcomes
+otherwise resulting in use of in use of this tool and project.
 
 By design; the purpose of this tool is to collect activity by exposing a
 controlled endpoint to the internet.
@@ -139,7 +139,7 @@ or password](https://www.raspberrypi.org/documentation/linux/usage/users.md)
 for raspian. Whilst no services are intentionally exposed,
 it is, at very least; best practice.
 
-#### Clone DShield Repoistory
+#### Software Installation
 ```
 git clone https://github.com/DShield-ISC/dshield.git
 ```
@@ -148,7 +148,9 @@ git clone https://github.com/DShield-ISC/dshield.git
 cd dshield/bin
 sudo ./install.sh
 ```
-- if curious watch the debug log file in parallel to the installation: connect with an additional ssh session to the system and run (name of the log file will be printed out by the installation script):
+- if curious watch the debug log file in parallel to the installation:
+connect with an additional ssh session to the system and run (name of
+the log file will be printed out by the installation script):
 ```
 sudo tail -f LOGFILE
 ```
@@ -157,6 +159,48 @@ sudo tail -f LOGFILE
 ```
 sudo reboot
 ```
+
+#### Network Configuration / Physical Placement
+
+This dshield sensor and honeypot is meant to only analyze Internet
+related traffic, i.e. traffic which is issued from public IP addresses:
+- this is due to how the dshield project works (collection of
+information about the current state of the Internet)
+- only in this way information which is interesting for the Internet
+security community can be gathered
+- only in this way it can be ensured that no internal, non-public
+information is leaked from your Pi to Dshield
+
+So you must place the Pi on a network where it can be exposed to the
+Internet (and won't be connected to from the inner networks, except for
+administrative tasks). For a maximum sensor benefit it is desirable that
+the Pi is exposed to the whole traffic the Internet routes to a public
+IP (and not only selected ports).
+
+For SoHo users there is normally an option in the DSL or cable router to
+direct all traffic from the public IP the router is using (i.e. has been
+assigned by the ISP) to an internal IP. This has to be the Pi. This
+feature is named e.g. "exposed host", "DMZ" (here you may have to enable
+further configuration to ensure ___all___ traffic is being routed to the
+Pi's internal IP address and not only e.g. port 80).
+
+For enterprises a protected DMZ would be a suitable place (protected: if
+the sensor / honeypot is hacked this incident is contained and doesn't
+affect other hosts in the DMZ). Please be aware that - if using static
+IPs - you're exposing attacks / scans to your IP to the dhshield project
+and the community which can be tracked via whois to your company.
+
+To test your set up you may use a public port scanner and point it to
+the router's public IP (which is then internally forwarded to the Pi).
+This port scan should be directly visible in `/var/log/dshield.log` and
+later in your online report accessible via your dshield account. Use
+only for quick and limited testing purposes, please, so that dhshield
+data isn't falsified.
+
+- expose the Pi to inbound traffic. For example, in many firewalls and
+home routers you will be able to configure it as a "DMZ Hosts", "exposed
+devices", ... see [hints below](#how-to-place-the-dshield-sensor--honeypot)
+for - well - hints ...
 
 ### Usage
 
@@ -167,55 +211,27 @@ general maintenance (System Updates, if not enabled).
 Within the hour, you should start seeing data fed via your [DShield
 Reports](https://dshield.org/myreports.html).
 
-### Placement
-
-This dshield sensor and honeypot is meant to only analyze Internet related traffic, i.e. traffic which is issued from public IP addresses:
-- this is due to how the dshield project works (collection of information about the current state of the Internet)
-- only in this way information which is interesting for the Internet security community can be gathered
-- only in this way it can be ensured that no internal, non-public information is leaked from your Pi to Dshield
-
-So you must place the Pi on a network where it can be exposed to the Internet (and won't be connected to from the inner networks, except for administrative tasks). For a maximum sensor benefit it is desirable that the Pi is exposed to the whole traffic the Internet routes to a public IP (and not only selected ports).
-
-For SoHo users there is normally an option in the DSL or cable router to direct all traffic from the public IP the router is using (i.e. has been assigned by the ISP) to an internal IP. This has to be the Pi. This feature is named e.g. "exposed host", "DMZ" (here you may have to enable further configuration to ensure ___all___ traffic is being routed to the Pi's internal IP address and not only e.g. port 80).
-
-For enterprises a protected DMZ would be a suitable place (protected: if the sensor / honeypot is hacked this incident is contained and doesn't affect other hosts in the DMZ). Please be aware that - if using static IPs - you're exposing attacks / scans to your IP to the dhshield project and the community which can be tracked via whois to your company.
-
-To test your set up you may use a public port scanner and point it to the router's public IP (which is then internally forwarded to the Pi). This port scan should be directly visible in `/var/log/dshield.log` and later in your online report accessible via your dshield account. Use only for quick and limited testing purposes, please, so that dhshield data isn't falsified.
-
-
-- expose the Pi to inbound traffic. For example, in many firewalls and home routers
-  you will be able to configure it as a "DMZ Hosts", "exposed devices", ... see [hints below](#how-to-place-the-dshield-sensor--honeypot) for - well - hints ...
-
 ## Deployment
 
 Add additional notes about how to deploy this on a live system
 
 ## Built With
 
-* [Cowrie](https://github.com/micheloosterhof/cowrie) - The ssh/telnet Honeypot
+* [Cowrie](https://github.com/micheloosterhof/cowrie) - The ssh/telnet
+Honeypot
 * [Web.py](https://github.com/webpy/webpy) - The HTTP/s/alt Honeypot
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
+Please read [CONTRIBUTING.md](https://github.com/DShield-ISC/dshield/blob/master/CONTRIBUTING.md)
+for details on our code of conduct, and contributing.
 
 ## Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+See the list of [contributors](https://github.com/DShield-ISC/dshield/graphs/contributors)
+who participated in this project.
 
 ## License
 
-This project is licensed under the GPL V2 License - see the [LICENSE](LICENSE) file for details
-
-## Acknowledgments
-
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
-
+This project is licensed under the GPL V2 License - see the [LICENSE](LICENSE)
+file for details
