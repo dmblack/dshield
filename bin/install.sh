@@ -14,7 +14,6 @@
 ## CONFIG SECTION
 ###########################################################
 
-
 readonly version=0.49
 
 #
@@ -97,7 +96,6 @@ TELNETREDIRECT="23 2323"
 WEBREDIRECT="80 8080 7547 5555 9000"
 HONEYPORTS="${SSHHONEYPORT} ${TELNETHONEYPORT} ${WEBHONEYPORT}"
 
-
 # which port the real sshd should listen to
 SSHDPORT="12222"
 
@@ -118,7 +116,6 @@ LINE="##########################################################################
 : ${DIALOG_ESC=255}
 
 export NCURSES_NO_UTF8_ACS=1
-
 
 ###########################################################
 ## FUNCTION SECTION
@@ -227,7 +224,6 @@ clear
 ## basic checks
 ###########################################################
 
-
 echo ${LINE}
 
 userid=`id -u`
@@ -275,9 +271,7 @@ drun "uname -a"
 dlog "sourcing /etc/os-release"
 . /etc/os-release
 
-
 dist=invalid
-
 
 if [ "$ID" == "ubuntu" ] ; then
    dist='apt'
@@ -302,7 +296,6 @@ fi
 if [ "$ID" == "raspbian" ] && [ "$VERSION_ID" == "9" ] ; then
    dist='apt'
    distversion=r9
-   
 fi
 
 if [ "$ID" == "amzn" ] && [ "$VERSION_ID" == "2016.09" ] ; then 
@@ -377,7 +370,6 @@ if [ "$ID" == "amzn" ]; then
    run 'yum -q install -y dialog perl-libwww-perl perl-Switch rng-tools boost-random'
 fi
 
-
 ###########################################################
 ## last chance to escape before hurting the system ...
 ###########################################################
@@ -438,7 +430,6 @@ else
 fi
 
 dlog "MANUPDATES: ${MANUPDATES}"
-
 
 ###########################################################
 ## Stopping Cowrie if already installed
@@ -502,7 +493,6 @@ fi
 
 drun 'pip list --format=legacy'
 
-
 ###########################################################
 ## Random number generator
 ###########################################################
@@ -513,7 +503,6 @@ drun 'pip list --format=legacy'
 
 dlog "Changing random number generator settings."
 run 'echo "HRNGDEVICE=/dev/urandom" > /etc/default/rnd-tools'
-
 
 ###########################################################
 ## Disable IPv6
@@ -534,7 +523,6 @@ EOF
 run "chmod 644 /etc/modprobe.d/ipv6.conf"
 drun "cat /etc/modprobe.d/ipv6.conf.bak"
 drun "cat /etc/modprobe.d/ipv6.conf"
-
 
 ###########################################################
 ## Handling existing config
@@ -567,7 +555,6 @@ if ! [ -d $TMPDIR ]; then
    outlog "${TMPDIR} not found, aborting."
    exit 9
 fi
-
 
 ###########################################################
 ## DShield Account
@@ -651,7 +638,6 @@ fi # dialogue not aborted
 # echo $uid
 
 dialog --title 'API Key Verified' --msgbox 'Your API Key is valid. The firewall will be configured next. ' 7 40
-
 
 ###########################################################
 ## Firewall Configuration
@@ -800,7 +786,6 @@ dlog "CONIPS with config values before removing duplicates: ${CONIPS}"
 CONIPS=`echo ${CONIPS} | tr ' ' '\n' | sort -u | tr '\n' ' ' | sed 's/ $//'`
 dlog "CONIPS with removed duplicates: ${CONIPS}"
 
-
 dlog "Getting local network, further IPs and admin ports from user ..."
 while [ $localnetok -eq  0 ] ; do
 
@@ -857,7 +842,6 @@ ${CONIPS}" 0 0
 
 localips="'${CONIPS}'"
 adminports="'${ADMINPORTS}'"
-
 
 ##---------------------------------------------------------
 ## IPs for which logging should be disabled
@@ -980,7 +964,6 @@ dlog "final values: "
 dlog "NOHONEYIPS: ${NOHONEYIPS} / NOHONEYPORTS: ${NOHONEYPORTS}"
 dlog "nohoneyips: ${nohoneyips} / nohoneyports: ${nohoneyports}"
 
-
 ##---------------------------------------------------------
 ## create actual firewall rule set
 ##---------------------------------------------------------
@@ -1051,8 +1034,6 @@ if [ "${HONEYPORTS}" != "" ] ; then
    echo "# END: Ports honeypot should be enabled for"  >> /etc/network/iptables
 fi
 
-
-
 # create stuff for PREROUTING chain:
 # - no logging for trusted nets -> skip rest of chain (4.)
 #   (this means for trusted nets the redirects for
@@ -1114,11 +1095,9 @@ dlog "Copying /etc/network/if-pre-up.d"
 
 do_copy $progdir/../etc/network/if-pre-up.d/dshield /etc/network/if-pre-up.d 700
 
-
 ###########################################################
 ## Change real SSHD port
 ###########################################################
-
 
 dlog "changing port for sshd"
 
@@ -1144,7 +1123,6 @@ fi
 ## Modifying syslog config
 ###########################################################
 
-
 dlog "setting interface in syslog config"
 # no %%interface%% in dshield.conf template anymore, so only copying file
 # run 'sed "s/%%interface%%/$interface/" < $progdir/../etc/rsyslog.d/dshield.conf > /etc/rsyslog.d/dshield.conf'
@@ -1155,7 +1133,6 @@ drun 'cat /etc/rsyslog.d/dshield.conf'
 ###########################################################
 ## Further copying / configuration
 ###########################################################
-
 
 #
 # moving dshield stuff to target directory
@@ -1173,7 +1150,6 @@ if [ ${MANUPDATES} -eq 0 ]; then
    run 'touch ${DSHIELDDIR}/auto-update-ok'
 fi
 
-
 #
 # "random" offset for cron job so not everybody is reporting at once
 #
@@ -1184,9 +1160,7 @@ offset2=$((offset1+30));
 echo "${offset1},${offset2} * * * * root cd ${DSHIELDDIR}; ./weblogsubmit.py" > /etc/cron.d/dshield 
 echo "${offset1},${offset2} * * * * root ${DSHIELDDIR}/fwlogparser.py" >> /etc/cron.d/dshield
 
-
 drun 'cat /etc/cron.d/dshield'
-
 
 #
 # Update dshield Configuration
@@ -1224,11 +1198,9 @@ run 'echo "manualupdates=$MANUPDATES" >> /etc/dshield.ini'
 dlog "new /etc/dshield.ini follows"
 drun 'cat /etc/dshield.ini'
 
-
 ###########################################################
 ## Installation of cowrie
 ###########################################################
-
 
 #
 # installing cowrie
@@ -1299,11 +1271,9 @@ cd ${OLDDIR}
 
 outlog "Doing further cowrie configuration."
 
-
 # step 6 (Generate a DSA key)
 dlog "generating cowrie SSH hostkey"
 run "ssh-keygen -t dsa -b 1024 -N '' -f ${COWRIEDIR}/data/ssh_host_dsa_key "
-
 
 # step 5 (Install configuration file)
 dlog "copying cowrie.cfg and adding entries"
@@ -1351,9 +1321,6 @@ find /etc/rc?.d -name '*cowrie*' -delete
 run 'systemctl daemon-reload'
 run 'systemctl enable cowrie.service'
 
-
-
-
 ###########################################################
 ## Installation of web honeypot
 ###########################################################
@@ -1379,7 +1346,6 @@ touch ${WEBDIR}/DB/webserver.sqlite
 run "chown cowrie ${WEBDIR}/DB"
 run "chown cowrie ${WEBDIR}/DB/*"
 
-
 ###########################################################
 ## Copying further system files
 ###########################################################
@@ -1389,7 +1355,6 @@ dlog "copying further system files"
 do_copy $progdir/../etc/cron.hourly/dshield /etc/cron.hourly 755
 # do_copy $progdir/../etc/mini-httpd.conf /etc/mini-httpd.conf 644
 # do_copy $progdir/../etc/default/mini-httpd /etc/default/mini-httpd 644
-
 
 ###########################################################
 ## Remove old mini-httpd stuff (if run as an update)
@@ -1405,18 +1370,14 @@ if [ -f /etc/default/mini-httpd ] ; then
    mv /etc/default/mini-httpd /etc/default/.mini-httpd.${INSTDATE}
 fi
 
-
-
 ###########################################################
 ## Setting up Services
 ###########################################################
-
 
 # setting up services
 dlog "setting up services: cowrie"
 run 'update-rc.d cowrie defaults'
 # run 'update-rc.d mini-httpd defaults'
-
 
 ###########################################################
 ## Setting up postfix
@@ -1438,7 +1399,6 @@ outlog "package configuration for postfix"
 run 'debconf-get-selections | grep postfix'
 dlog "installing postfix"
 run 'apt-get -y -q install postfix'
-
 
 ###########################################################
 ## Configuring MOTD
@@ -1470,11 +1430,9 @@ run "chown root:root /etc/motd"
 
 drun "cat /etc/motd"
 
-
 ###########################################################
 ## Handling of CERTs
 ###########################################################
-
 
 #
 # checking / generating certs
@@ -1549,6 +1507,3 @@ outlog "           connect using ssh -p ${SSHDPORT} $SUDO_USER@$ipaddr"
 outlog
 outlog "### Thank you for supporting the ISC and dshield! ###"
 outlog
-
-
-
