@@ -1,9 +1,9 @@
 # D-Shield Raspberry Pi Sensor
 
-This project is set of scripts configures a Raspberry Pi as a DShield
+This project is set of scripts configures a Raspberry Pi as a D-Shield
 Sensor.
 
-The DShield sensor utilizes [Cowrie](https://github.com/micheloosterhof/cowrie || https://github.com/cowrie/cowrie),
+The D-Shield sensor utilizes [Cowrie](https://github.com/micheloosterhof/cowrie || https://github.com/cowrie/cowrie),
 [web.py](https://github.com/webpy/webpy), and iptables, to monitor and
 record appropriate network activity.
 
@@ -19,13 +19,11 @@ ISC.SANS.EDU.
 * No IPv6 Support (Currently Disabled)
 
 ## Getting Started
-
 The following information will assist you in initializing your own
 D-Shield Raspberry Pi Sensor. It is recommended you follow them, in
 order.
 
 ### Forewarning
-
 [liability here] D-Shield, it's community, and it's contributors; can
 not take any responsibility for any undesired behavior or outcomes
 otherwise resulting in use of in use of this tool and project.
@@ -40,7 +38,7 @@ It is, therefore, highly recommended that you;
 ### Dependencies
 
 * Appropriate [Network Infrastructure](Network-Infrastructure)
-* [DShield Account and API Key](DShield-Account)
+* [D-Shield Account and API Key](D-Shield-Account)
 * Internet connectivity
 * Internet quota of at least [~10MB per/day](Bandwdith)
 * GIT
@@ -65,13 +63,13 @@ or
 # sudo apt -y dist-upgrade
 ```
 
-#### DShield Account
+#### D-Shield Account
 
 A D Shield account is required to use this service. You can create one
 by [registering here](https://dshield.org/register.html). Soon after
 registration, an API key is allocated.
 
-You can confirm your [API Key Here](https://dshield.org/register.html).
+You can confirm your [API Key Here](https://dshield.org/myaccount.html).
 
 #### Bandwidth
 
@@ -129,7 +127,7 @@ This script will;
 * Install, and configure, Cowrie
 * Install, and configure, Web.py
 * Install and configure postfix (not sure why?)
-* Change your MOTD to reflect it's now a DShield SEnsor
+* Change your MOTD to reflect it's now a D-Shield SEnsor
 * Reboot
 
 ### Installation
@@ -204,11 +202,11 @@ for - well - hints ...
 
 ### Usage
 
-After installation; the DShield Sensor is mostly self sufficient. You
+After installation; the D-Shield Sensor is mostly self sufficient. You
 should not need to login (via port SSH: 12222) for anything other than
 general maintenance (System Updates, if not enabled).
 
-Within the hour, you should start seeing data fed via your [DShield
+Within the hour, you should start seeing data fed via your [D-Shield
 Reports](https://dshield.org/myreports.html).
 
 ## Deployment
