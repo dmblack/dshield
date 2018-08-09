@@ -11,19 +11,23 @@ At set intervals (twice a hour); logs are then parsed, feeding data to
 ISC.SANS.EDU.
 
 ## Project Goals
+
 * Ease of Configuration and Installation
 * Minimal Complexity
 * Use of a dedicated device
 
 ## Current Limitations
+
 * No IPv6 Support (Currently Disabled)
 
 ## Getting Started
+
 The following information will assist you in initializing your own
 D-Shield Raspberry Pi Sensor. It is recommended you follow them, in
 order.
 
 ### Forewarning
+
 [liability here] D-Shield, it's community, and it's contributors; can
 not take any responsibility for any undesired behavior or outcomes
 otherwise resulting in use of in use of this tool and project.
