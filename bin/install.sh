@@ -77,7 +77,7 @@ DSHIELDDIR="${TARGETDIR}/dshield"
 COWRIEDIR="${TARGETDIR}/cowrie" # remember to also change the init.d script!
 LOGDIR="${TARGETDIR}/log"
 WEBDIR="${TARGETDIR}/www"
-INSTDATE="`date +'%Y-%m-%d_%H%M%S'`"
+INSTDATE=$(date +'%Y-%m-%d_%H%M%S')
 LOGFILE="${LOGDIR}/install_${INSTDATE}.log"
 
 # which ports will be handled e.g. by cowrie (separated by blanks)
@@ -108,12 +108,12 @@ DEBUG=1
 LINE="##########################################################################################################"
 
 # dialog stuff
-: ${DIALOG_OK=0}
-: ${DIALOG_CANCEL=1}
-: ${DIALOG_HELP=2}
-: ${DIALOG_EXTRA=3}
-: ${DIALOG_ITEM_HELP=4}
-: ${DIALOG_ESC=255}
+: "${DIALOG_OK=0}"
+: "${DIALOG_CANCEL=1}"
+: "${DIALOG_HELP=2}"
+: "${DIALOG_EXTRA=3}"
+: "${DIALOG_ITEM_HELP=4}"
+: "${DIALOG_ESC=255}"
 
 export NCURSES_NO_UTF8_ACS=1
 
@@ -133,14 +133,14 @@ do_log () {
        mkdir -p ${LOGDIR}
        chmod 700 ${LOGDIR}
    fi
-   if [ ! -f ${LOGFILE} ] ; then
-       touch ${LOGFILE}
-       chmod 600 ${LOGFILE}
+   if [ ! -f "${LOGFILE}" ] ; then
+       touch "${LOGFILE}"
+       chmod 600 "${LOGFILE}"
        outlog "Log ${LOGFILE} started."
        outlog "ATTENTION: the log file contains sensitive information (e.g. passwords, API keys, ...)"
        outlog "           Handle with care. Sanitize before submitting."
    fi
-   echo "`date +'%Y-%m-%d_%H%M%S'` ### ${*}" >> ${LOGFILE}
+   echo "$(date +'%Y-%m-%d_%H%M%S') ### ${*}" >> "${LOGFILE}"
 }
 
 # execute and log
@@ -148,7 +148,7 @@ do_log () {
 #    if redirects etc. are used
 run () {
    do_log "Running: ${*}"
-   eval ${*} >> ${LOGFILE} 2>&1
+   eval "${*}" >> "${LOGFILE}" 2>&1
    RET=${?}
    if [ ${RET} -ne 0 ] ; then
       dlog "EXIT CODE NOT ZERO (${RET})!"
@@ -163,7 +163,7 @@ drun () {
    if [ ${DEBUG} -eq 1 ] ; then
       do_log "DEBUG COMMAND FOLLOWS:"
       do_log "${LINE}"
-      run ${*}
+      run "${*}"
       RET=${?}
       do_log "${LINE}"
       return ${RET}
@@ -184,7 +184,7 @@ dlog () {
 # optional: $3: chmod bitmask (only if $1 isn't a directory)
 do_copy () { 
    dlog "copying ${1} to ${2} and chmod to ${3}"
-   if [ -d ${1} ] ; then
+   if [ -d "${1}" ] ; then
       if [ "${3}" != "" ] ; then
          # source is a directory, but chmod bitmask given nevertheless, issue a warning
          dlog "WARNING: do_copy: $1 is a directory, but chmod bitmask given, ignored!"
@@ -197,21 +197,20 @@ do_copy () {
       outlog "Error copying ${1} to ${2}. Aborting."
       exit 9
    fi
-   if [ "${3}" != "" -a ! -d ${1} ] ; then
+   if [ "${3}" != "" ] && [ ! -d "${1}" ] ; then
       # only if $1 isn't a directory!
-      if [ -f ${2} ] ; then
+      if [ -f "${2}" ] ; then
          # target is a file, chmod directly
          run "chmod ${3} ${2}"
       else
          # target is a directory, so use basename
-         run "chmod ${3} ${2}/`basename ${1}`"
+         run "chmod ${3} ${2}/$(basename "${1}")"
       fi
       if [ ${?} -ne 0 ] ; then
          outlog "Error executing chmod ${3} ${2}/${1}. Aborting."
          exit 9
       fi
    fi
-
 }
 
 ###########################################################
@@ -226,7 +225,7 @@ clear
 
 echo ${LINE}
 
-userid=`id -u`
+userid=$(id -u)
 if [ ! "$userid" = "0" ]; then
    echo "You have to run this script as root. eg."
    echo "  sudo bin/install.sh"
@@ -251,13 +250,13 @@ drun 'df -h'
 outlog "Checking Pre-Requisits"
 
 progname=$0;
-progdir=`dirname $0`;
+progdir=$(dirname "$0");
 progdir=$PWD/$progdir;
 
 dlog "progname: ${progname}"
 dlog "progdir: ${progdir}"
 
-cd $progdir
+cd "$progdir" || exit
 
 if [ ! -f /etc/os-release ] ; then
   outlog "I can not fine the /etc/os-release file. You are likely not running a supported operating systems"
@@ -315,28 +314,27 @@ if [ "$ID" != "raspbian" ] ; then
    outlog "ATTENTION: the latest versions of this script have been tested on Raspbian only."
    outlog "It may or may not work with your distro. Feel free to test and contribute."
    outlog "Press ENTER to continue, CTRL+C to abort."
-   read lala
+   read -r lala
 fi
 
 outlog "using apt to install packages"
 
 dlog "creating a temporary directory"
 
-TMPDIR=`mktemp -d -q /tmp/dshieldinstXXXXXXX`
+TMPDIR=$(mktemp -d -q /tmp/dshieldinstXXXXXXX)
 dlog "TMPDIR: ${TMPDIR}"
 
 dlog "setting trap"
 # trap "rm -r $TMPDIR" 0 1 2 5 15
-run 'trap "echo Log: ${LOGFILE} && rm -r $TMPDIR" 0 1 2 5 15'
+run "trap \"echo Log: ${LOGFILE} && rm -r $TMPDIR\" 0 1 2 5 15"
 
 outlog "Basic security checks"
 
 dlog "making sure default password was changed"
 
 if [ "$dist" == "apt" ]; then
-
    dlog "we are on pi and should check if password for user pi has been changed"
-   if $progdir/passwordtest.pl | grep -q 1; then
+   if "$progdir"/passwordtest.pl | grep -q 1; then
       outlog "You have not yet changed the default password for the 'pi' user"
       outlog "Change it NOW ..."
       exit 9
@@ -423,7 +421,7 @@ case $response in
       ;;
 esac
 
-if [ ${VALUES} == "manual" ] ; then
+if [ "${VALUES}" == "manual" ] ; then
    MANUPDATES=1
 else
    MANUPDATES=0
@@ -455,12 +453,12 @@ run 'pip > /dev/null'
 
 if [ ${?} -gt 0 ] ; then
    outlog "no pip found, installing pip"
-   run 'wget -qO $TMPDIR/get-pip.py https://bootstrap.pypa.io/get-pip.py'
+   run "wget -qO $TMPDIR/get-pip.py https://bootstrap.pypa.io/get-pip.py"
    if [ ${?} -ne 0 ] ; then
       outlog "Error downloading get-pip, aborting."
       exit 9
    fi
-   run 'python $TMPDIR/get-pip.py'
+   run "python $TMPDIR/get-pip.py"
    if [ ${?} -ne 0 ] ; then
       outlog "Error running get-pip, aborting."
       exit 9
@@ -482,13 +480,12 @@ else
    #   OR
    # - pip below /usr without local
    # -> potential distro pip found
-   if [ `pip  -V | cut -d " " -f 4 | cut -d "/" -f 3` != "local" -o `find /usr -name pip | grep -v local | wc -l` -gt 0 ] ; then
+   if [ "$(pip  -V | cut -d " " -f 4 | cut -d "/" -f 3)" != local ] || [ "$(find /usr -name pip | grep -vc local)" -gt 0 ] ; then
       # pip may be distro pip
       outlog "Potential distro pip found"
    else
       outlog "pip found which doesn't seem to be installed as a distro package. Looks ok to me."
    fi
-
 fi
 
 drun 'pip list --format=legacy'
@@ -542,7 +539,7 @@ if [ -f /etc/dshield.ini ] ; then
       drun 'cat /etc/dshield.ini'
    fi
    # believe it or not, bash has a built in .ini parser. Just need to remove spaces around "="
-   source <(grep = /etc/dshield.ini | sed 's/ *= */=/g')
+   source <(grep=/etc/dshield.ini | sed 's/ *= */=/g')
    dlog "dshield.ini found, content follows"
    drun 'cat /etc/dshield.ini'
    dlog "securing dshield.ini"
@@ -551,7 +548,7 @@ if [ -f /etc/dshield.ini ] ; then
 fi
 
 # hmmm - this SHOULD NOT happen
-if ! [ -d $TMPDIR ]; then
+if ! [ -d "$TMPDIR" ]; then
    outlog "${TMPDIR} not found, aborting."
    exit 9
 fi
@@ -569,7 +566,7 @@ fi
 return_value=$DIALOG_OK
 return=1
 
-if [ $return_value -eq  $DIALOG_OK ]; then
+if [ "$return_value" -eq  "$DIALOG_OK" ]; then
    if [ $return = "1" ] ; then
       dlog "use existing dhield account"
       apikeyok=0
@@ -586,19 +583,19 @@ if [ $return_value -eq  $DIALOG_OK ]; then
 
          case $response in 
             ${DIALOG_OK})
-               email=`echo $VALUES | cut -f1 -d' '`
-               apikey=`echo $VALUES | cut -f2 -d' '`
+               email=$(echo "$VALUES" | cut -f1 -d' ')
+               apikey=$(echo "$VALUES" | cut -f2 -d' ')
                dlog "Got email ${email} and apikey ${apikey}"
                dlog "Calculating nonce."
-               nonce=`openssl rand -hex 10`
+               nonce=$(openssl rand -hex 10)
                dlog "Calculating hash."
-	       hash=`echo -n $email:$apikey | openssl dgst -hmac $nonce -sha512 -hex | cut -f2 -d'=' | tr -d ' '`
+	           hash=$(echo -n "$email":"$apikey" | openssl dgst -hmac "$nonce" -sha512 -hex | cut -f2 -d'=' | tr -d ' ')
                dlog "Calculated nonce (${nonce}) and hash (${hash})."
 
 	       # TODO: urlencode($user)
-	       user=`echo $email | sed 's/+/%2b/' | sed 's/@/%40/'`
-               dlog "Checking API key ..."
-	       run 'curl -s https://isc.sans.edu/api/checkapikey/$user/$nonce/$hash > $TMPDIR/checkapi'
+	       user=$(echo "$email" | sed 's/+/%2b/' | sed 's/@/%40/')
+               dlog "Checking $user API key ..."  # - fixes $user unused, though it's used in 'run'
+	       run "curl -s https://isc.sans.edu/api/checkapikey/$user/$nonce/$hash > $TMPDIR/checkapi"
    
                dlog "Curl return code is ${?}"
    
@@ -612,9 +609,9 @@ if [ $return_value -eq  $DIALOG_OK ]; then
    
                dlog "Excamining result of API key check ..."
    
-               if grep -q '<result>ok</result>' $TMPDIR/checkapi ; then
+               if grep -q '<result>ok</result>' "$TMPDIR"/checkapi ; then
                   apikeyok=1;
-                  uid=`grep  '<id>.*<\/id>' $TMPDIR/checkapi | sed -E 's/.*<id>([0-9]+)<\/id>.*/\1/'`
+                  uid=$(grep  '<id>.*<\/id>' "$TMPDIR"/checkapi | sed -E 's/.*<id>([0-9]+)<\/id>.*/\1/')
                   dlog "API key OK, uid is ${uid}"
                else
                   dlog "API key not OK, informing user"
@@ -698,12 +695,12 @@ if [ "$interface" == "" ] ; then
    dlog "Trying to figure out interface"
    # we don't expect a honeypot connected by WLAN ... but the user can change this of course
    drun "ip link show | egrep '^[0-9]+: ' | cut -f 2 -d':' | tr -d ' ' | grep -v lo | grep -v wlan"
-   interface=`ip link show | egrep '^[0-9]+: ' | cut -f 2 -d':' | tr -d ' ' | grep -v lo | grep -v wlan`
+   interface=$(ip link show | egrep '^[0-9]+: ' | cut -f 2 -d':' | tr -d ' ' | grep -v lo | grep -v wlan)
 fi
 
 # list of valid interfaces
 drun "ip link show | grep '^[0-9]' | cut -f2 -d':' | tr -d '\n' | sed 's/^ //'"
-validifs=`ip link show | grep '^[0-9]' | cut -f2 -d':' | tr -d '\n' | sed 's/^ //'`
+validifs=$(ip link show | grep '^[0-9]' | cut -f2 -d':' | tr -d '\n' | sed 's/^ //')
 
 dlog "validifs: ${validifs}"
 
@@ -751,26 +748,26 @@ dlog "firewall config: figuring out local network"
 
 drun "ip addr show  eth0"
 drun "ip addr show  eth0 | grep 'inet ' |  awk '{print \$2}' | cut -f1 -d'/'"
-ipaddr=`ip addr show  eth0 | grep 'inet ' |  awk '{print $2}' | cut -f1 -d'/'`
+ipaddr=$(ip addr show  eth0 | grep 'inet ' |  awk '{print $2}' | cut -f1 -d'/')
 dlog "ipaddr: ${ipaddr}"
 
 drun "ip route show"
 drun "ip route show | grep eth0 | grep 'scope link' | cut -f1 -d' '"
-localnet=`ip route show | grep eth0 | grep 'scope link' | cut -f1 -d' '`
+localnet=$(ip route show | grep eth0 | grep 'scope link' | cut -f1 -d' ')
 # added most common private subnets. This will help if the Pi is in its
 # own subnet (e.g. 192.168.1.0/24) which is part of a larger network.
 # either way, hits from private IPs are hardly ever log worthy.
-if echo $localnet | grep -q '^10\.'; then localnet='10.0.0.0/8'; fi
-if echo $localnet | grep -q '^192\.168\.'; then localnet='192.168.0.0/16'; fi
+if echo "$localnet" | grep -q '^10\.'; then localnet='10.0.0.0/8'; fi
+if echo "$localnet" | grep -q '^192\.168\.'; then localnet='192.168.0.0/16'; fi
 dlog "localnet: ${localnet}"
 
 # additionally we will use any connection to current sshd 
 # (ignroing config and using real connections)
 # as trusted / local IP (just to make sure we include routed networks)
 drun "grep '^Port' /etc/ssh/sshd_config | awk '{print \$2}'"
-CURSSHDPORT=`grep '^Port' /etc/ssh/sshd_config | awk '{print $2}'`
+CURSSHDPORT=$(grep '^Port' /etc/ssh/sshd_config | awk '{print $2}')
 drun "netstat -an | grep ':${CURSSHDPORT}' | grep ESTABLISHED | awk '{print \$5}' | cut -d ':' -f 1 | sort -u | tr '\n' ' ' | sed 's/ $//'"
-CONIPS=`netstat -an | grep ":${CURSSHDPORT}" | grep ESTABLISHED | awk '{print $5}' | cut -d ':' -f 1 | sort -u | tr '\n' ' ' | sed 's/ $//'`
+CONIPS=$(netstat -an | grep ":${CURSSHDPORT}" | grep ESTABLISHED | awk '{print $5}' | cut -d ':' -f 1 | sort -u | tr '\n' ' ' | sed 's/ $//')
 
 localnetok=0
 ADMINPORTS=$adminports
@@ -783,7 +780,7 @@ fi
 # reboot at least for the current remote device
 CONIPS="$localips ${CONIPS}"
 dlog "CONIPS with config values before removing duplicates: ${CONIPS}"
-CONIPS=`echo ${CONIPS} | tr ' ' '\n' | sort -u | tr '\n' ' ' | sed 's/ $//'`
+CONIPS=$(echo "${CONIPS}" | tr ' ' '\n' | sort -u | tr '\n' ' ' | sed 's/ $//')
 dlog "CONIPS with removed duplicates: ${CONIPS}"
 
 dlog "Getting local network, further IPs and admin ports from user ..."
@@ -802,25 +799,25 @@ while [ $localnetok -eq  0 ] ; do
       ${DIALOG_OK})
          dlog "User input for local network & IPs: ${RETVALUES}"
 
-         localnet=`echo "${RETVALUES}" | cut -d "
-" -f 1`
-         CONIPS=`echo "${RETVALUES}" | cut -d "
-" -f 2`
-         ADMINPORTS=`echo "${RETVALUES}" | cut -d "
-" -f 3`
+         localnet=$(echo "${RETVALUES}" | cut -d "
+" -f 1)
+         CONIPS=$(echo "${RETVALUES}" | cut -d "
+" -f 2)
+         ADMINPORTS=$(echo "${RETVALUES}" | cut -d "
+" -f 3)
 
          dlog "user input localnet: ${localnet}"
          dlog "user input further IPs: ${CONIPS}"
          dlog "user input further admin ports: ${ADMINPORTS}"
 
          # OK (exit loop) if local network OK _AND_ admin ports not empty
-         if [ `echo "$localnet" | egrep '^([0-9]{1,3}\.){3}[0-9]{1,3}\/[0-9]{1,2}$' | wc -l` -eq 1  -a -n "${ADMINPORTS// }" ] ; then
+         if [ "$(echo "$localnet" | egrep '^([0-9]{1,3}\.){3}[0-9]{1,3}\/[0-9]{1,2}$' | wc -l)" -eq 1 ] && [ -n "${ADMINPORTS// }" ] ; then
             localnetok=1
          fi
 
          if [ $localnetok -eq 0 ] ; then
             dlog "user provided localnet ${localnet} is not ok or adminports empty (${ADMINPORTS})"
-            dialog --title 'Local Network Error' --msgbox 'The format of the local network is wrong (it has to be in Network/CIDR format, for example 192.168.0.0/16) or the admin portlist is empty (should contain at least the SSHD port (${ADMINPORTS})).' 10 40
+            dialog --title "Local Network Error" --msgbox "The format of the local network is wrong (it has to be in Network/CIDR format, for example 192.168.0.0/16) or the admin portlist is empty (should contain at least the SSHD port (${ADMINPORTS}))." 10 40
          fi
       ;;
       ${DIALOG_CANCEL})
@@ -853,7 +850,7 @@ if [ "${nofwlogging}" == "" ] ; then
    # default: local net & connected IPs (as the user confirmed)
    nofwlogging="${localnet} ${CONIPS}"
    # remove duplicates
-   nofwlogging=`echo ${nofwlogging} | tr ' ' '\n' | sort -u | tr '\n' ' ' | sed 's/ $//'`
+   nofwlogging=$(echo "${nofwlogging}" | tr ' ' '\n' | sort -u | tr '\n' ' ' | sed 's/ $//')
 fi
 
 dlog "nofwlogging: ${nofwlogging}"
@@ -937,15 +934,15 @@ esac
 
 dlog "user provided NOHONEY: ${NOHONEY}"
 
-NOHONEYIPS=`echo "${NOHONEY}"  | cut -d "
-" -f 1`
-NOHONEYPORTS=`echo "${NOHONEY}"  | cut -d "
-" -f 2`
+NOHONEYIPS=$(echo "${NOHONEY}"  | cut -d "
+" -f 1)
+NOHONEYPORTS=$(echo "${NOHONEY}"  | cut -d "
+" -f 2)
 
 dlog "NOHONEYIPS: ${NOHONEYIPS}"
 dlog "NOHONEYPORTS: ${NOHONEYPORTS}"
 
-if [ "${NOHONEYIPS}" == "" -o "${NOHONEYPORTS}" == "" ] ; then
+if [ "${NOHONEYIPS}" == "" ] || [ "${NOHONEYPORTS}" == "" ] ; then
    dlog "at least one of the lines were empty, so can't do anything with the rest and will ignore it"
    NOHONEYIPS=""
    NOHONEYPORTS=""
@@ -1003,7 +1000,7 @@ EOF
 
 # insert IPs and ports for which honeypot has to be disabled
 # as soon as possible
-if [ "${NOHONEYIPS}" != "" -a "${NOHONEYIPS}" != " " ] ; then
+if [ "${NOHONEYIPS}" != "" ] && [ "${NOHONEYIPS}" != " " ] ; then
    echo "# START: IPs / Ports honeypot should be disabled for"  >> /etc/network/iptables
    for NOHONEYIP in ${NOHONEYIPS} ; do
       for NOHONEYPORT in ${NOHONEYPORTS} ; do
@@ -1055,7 +1052,7 @@ COMMIT
 EOF
 
 # insert to-be-ignored IPs just before the LOGging stuff so that traffic will be handled by default policy for chain
-if [ "${NOFWLOGGING}" != "" -a "${NOFWLOGGING}" != " " ] ; then
+if [ "${NOFWLOGGING}" != "" ] && [ "${NOFWLOGGING}" != " " ] ; then
    echo "# START: IPs firewall logging should be disabled for"  >> /etc/network/iptables
    for NOFWLOG in ${NOFWLOGGING} ; do
       echo "-A PREROUTING -i $interface -s ${NOFWLOG} -j RETURN" >> /etc/network/iptables
@@ -1093,7 +1090,7 @@ drun 'cat /etc/network/iptables'
 
 dlog "Copying /etc/network/if-pre-up.d"
 
-do_copy $progdir/../etc/network/if-pre-up.d/dshield /etc/network/if-pre-up.d 700
+do_copy "$progdir"/../etc/network/if-pre-up.d/dshield /etc/network/if-pre-up.d 700
 
 ###########################################################
 ## Change real SSHD port
@@ -1101,10 +1098,10 @@ do_copy $progdir/../etc/network/if-pre-up.d/dshield /etc/network/if-pre-up.d 700
 
 dlog "changing port for sshd"
 
-run "sed -i.bak 's/^[#\s]*Port 22\s*$/Port "${SSHDPORT}"/' /etc/ssh/sshd_config"
+run "sed -i.bak 's/^[#\s]*Port 22\s*$/Port ${SSHDPORT}/' /etc/ssh/sshd_config"
 
 dlog "checking if modification was successful"
-if [ `grep "^Port ${SSHDPORT}\$" /etc/ssh/sshd_config | wc -l` -ne 1 ] ; then
+if [ "$(grep -c "^Port ${SSHDPORT}\$" /etc/ssh/sshd_config)" -ne 1 ] ; then
    dialog --title 'sshd port' --ok-label 'Understood.' --cr-wrap --msgbox "Congrats, you had already changed your sshd port to something other than 22.
 
 Please clean up and either
@@ -1122,11 +1119,10 @@ fi
 ###########################################################
 ## Modifying syslog config
 ###########################################################
-
 dlog "setting interface in syslog config"
 # no %%interface%% in dshield.conf template anymore, so only copying file
 # run 'sed "s/%%interface%%/$interface/" < $progdir/../etc/rsyslog.d/dshield.conf > /etc/rsyslog.d/dshield.conf'
-do_copy $progdir/../etc/rsyslog.d/dshield.conf /etc/rsyslog.d 600
+do_copy "$progdir"/../etc/rsyslog.d/dshield.conf /etc/rsyslog.d 600
 
 drun 'cat /etc/rsyslog.d/dshield.conf'
 
@@ -1140,14 +1136,14 @@ drun 'cat /etc/rsyslog.d/dshield.conf'
 #
 
 run "mkdir -p ${DSHIELDDIR}"
-do_copy $progdir/../srv/dshield/fwlogparser.py ${DSHIELDDIR} 700
-do_copy $progdir/../srv/dshield/weblogsubmit.py ${DSHIELDDIR} 700
-do_copy $progdir/../srv/dshield/DShield.py ${DSHIELDDIR} 700
+do_copy "$progdir"/../srv/dshield/fwlogparser.py ${DSHIELDDIR} 700
+do_copy "$progdir"/../srv/dshield/weblogsubmit.py ${DSHIELDDIR} 700
+do_copy "$progdir"/../srv/dshield/DShield.py ${DSHIELDDIR} 700
 
 # check: automatic updates allowed?
 if [ ${MANUPDATES} -eq 0 ]; then
    dlog "automatic updates OK, configuring"
-   run 'touch ${DSHIELDDIR}/auto-update-ok'
+   run "touch ${DSHIELDDIR}/auto-update-ok"
 fi
 
 #
@@ -1155,7 +1151,7 @@ fi
 #
 
 dlog "creating /etc/cron.d/dshield"
-offset1=`shuf -i0-29 -n1`
+offset1=$(shuf -i0-29 -n1)
 offset2=$((offset1+30));
 echo "${offset1},${offset2} * * * * root cd ${DSHIELDDIR}; ./weblogsubmit.py" > /etc/cron.d/dshield 
 echo "${offset1},${offset2} * * * * root ${DSHIELDDIR}/fwlogparser.py" >> /etc/cron.d/dshield
@@ -1169,7 +1165,7 @@ dlog "creating new /etc/dshield.ini"
 if [ -f /etc/dshield.ini ]; then
    dlog "old dshield.ini follows"
    drun 'cat /etc/dshield.ini'
-   run 'mv /etc/dshield.ini /etc/dshield.ini.${INSTDATE}'
+   run "mv /etc/dshield.ini /etc/dshield.ini.${INSTDATE}"
 fi
 
 # new shiny config file
@@ -1177,9 +1173,9 @@ run 'touch /etc/dshield.ini'
 run 'chmod 600 /etc/dshield.ini'
 
 run 'echo "[DShield]" >> /etc/dshield.ini'
-run 'echo "email=$email" >> /etc/dshield.ini'
-run 'echo "userid=$uid" >> /etc/dshield.ini'
-run 'echo "apikey=$apikey" >> /etc/dshield.ini'
+run "echo email=\"$email\" >> /etc/dshield.ini"
+run "echo userid=\"$uid\" >> /etc/dshield.ini"
+run "echo apikey=\"$apikey\" >> /etc/dshield.ini"
 run 'echo "# the following lines will be used by a new feature of the submit code: "  >> /etc/dshield.ini'
 run 'echo "# replace IP with other value and / or anonymize parts of the IP"  >> /etc/dshield.ini'
 run 'echo "honeypotip=" >> /etc/dshield.ini'
@@ -1187,14 +1183,14 @@ run 'echo "replacehoneypotip=" >> /etc/dshield.ini'
 run 'echo "anonymizeip=" >> /etc/dshield.ini'
 run 'echo "anonymizemask=" >> /etc/dshield.ini'
 run 'echo "fwlogfile=/var/log/dshield.log" >> /etc/dshield.ini'
-run 'echo "nofwlogging=$nofwlogging" >> //etc/dshield.ini'
-run 'echo "localips=$CONIPS" >> /etc/dshield.ini'
-run 'echo "adminports=$ADMINPORTS" >> /etc/dshield.ini'
-run 'echo "nohoneyips=$nohoneyips" >> /etc/dshield.ini'
-run 'echo "nohoneports=$nohoneyports" >> /etc/dshield.ini'
+run "echo nofwlogging=\"$nofwlogging\" >> //etc/dshield.ini"
+run "echo localips=\"$CONIPS\" >> /etc/dshield.ini"
+run "echo adminports=\"$ADMINPORTS\" >> /etc/dshield.ini"
+run "echo nohoneyips=\"$nohoneyips\" >> /etc/dshield.ini"
+run "echo nohoneports=\"$nohoneyports\" >> /etc/dshield.ini"
 run 'echo "logretention=7" >> /etc/dshield.ini'
 run 'echo "minimumcowriesize=1000" >> /etc/dshield.ini'
-run 'echo "manualupdates=$MANUPDATES" >> /etc/dshield.ini'
+run "echo manualupdates=\"$MANUPDATES\" >> /etc/dshield.ini"
 dlog "new /etc/dshield.ini follows"
 drun 'cat /etc/dshield.ini'
 
@@ -1245,8 +1241,8 @@ run "mv $TMPDIR/cowrie-master ${COWRIEDIR}"
 
 # step 4 (Setup Virtual Environment)
 outlog "Installing Python packages with PIP. This will take a LOOONG time."
-OLDDIR=`pwd`
-cd ${COWRIEDIR}
+OLDDIR=$(pwd)
+cd ${COWRIEDIR} || exit
 dlog "setting up virtual environment"
 run 'virtualenv cowrie-env'
 dlog "activating virtual environment"
@@ -1267,7 +1263,7 @@ run 'pip install requests'
 #    outlog "Error installing dependencies from requirements-output.txt. See ${LOGFILE} for details."
 #    exit 9
 # fi
-cd ${OLDDIR}
+cd "${OLDDIR}" || exit
 
 outlog "Doing further cowrie configuration."
 
@@ -1280,16 +1276,22 @@ dlog "copying cowrie.cfg and adding entries"
 # adjust cowrie.cfg
 export uid
 export apikey
-export hostname=`shuf /usr/share/dict/american-english | head -1 | sed 's/[^a-z]//g'`
+hostname=$(shuf /usr/share/dict/american-english | head -1 | sed 's/[^a-z]//g')
+export hostname
 export sensor_name=dshield-$uid-$version
-fake1=`shuf -i 1-255 -n 1`
-fake2=`shuf -i 1-255 -n 1`
-fake3=`shuf -i 1-255 -n 1`
-export fake_addr=`printf "10.%d.%d.%d" $fake1 $fake2 $fake3`
-export arch=`arch`
-export kernel_version=`uname -r`
-export kernel_build_string=`uname -v | sed 's/SMP.*/SMP/'`
-export ssh_version=`ssh -V 2>&1 | cut -f1 -d','`
+fake1=$(shuf -i 1-255 -n 1)
+fake2=$(shuf -i 1-255 -n 1)
+fake3=$(shuf -i 1-255 -n 1)
+fake_addr=$(printf "10.%d.%d.%d" "$fake1" "$fake2" "$fake3")
+export fake_addr
+arch=$(arch)
+export arch
+kernel_version=$(uname -r)
+export kernel_version
+kernel_build_string=$(uname -v | sed 's/SMP.*/SMP/')
+export kernel_build_string
+ssh_version=$(ssh -V 2>&1 | cut -f1 -d',')
+export ssh_version
 drun 'cat ../srv/cowrie/cowrie.cfg | envsubst > /srv/cowrie/cowrie.cfg'
 
 # make output of simple text commands more real
@@ -1309,9 +1311,9 @@ run 'chown -R cowrie:cowrie /srv/cowrie'
 
 dlog "copying cowrie system files"
 
-do_copy $progdir/../lib/systemd/system/cowrie.service /lib/systemd/system/cowrie.service 644
-do_copy $progdir/../etc/logrotate.d/cowrie /etc/logrotate.d 644
-do_copy $progdir/../etc/cron.hourly/cowrie /etc/cron.hourly 755
+do_copy "$progdir"/../lib/systemd/system/cowrie.service /lib/systemd/system/cowrie.service 644
+do_copy "$progdir"/../etc/logrotate.d/cowrie /etc/logrotate.d 644
+do_copy "$progdir"/../etc/cron.hourly/cowrie /etc/cron.hourly 755
 
 # make sure to remove old cowrie start if they exist
 if [ -f /etc/init.d/cowrie ] ; then
@@ -1335,8 +1337,8 @@ fi
 
 run "mkdir -p ${WEBDIR}"
 
-do_copy $progdir/../srv/www ${WEBDIR}/../
-do_copy $progdir/../lib/systemd/system/webpy.service /lib/systemd/system/ 644
+do_copy "$progdir"/../srv/www ${WEBDIR}/../
+do_copy "$progdir"/../lib/systemd/system/webpy.service /lib/systemd/system/ 644
 run "systemctl enable webpy.service"
 run "systemctl daemon-reload"
 
@@ -1352,7 +1354,7 @@ run "chown cowrie ${WEBDIR}/DB/*"
 
 dlog "copying further system files"
 
-do_copy $progdir/../etc/cron.hourly/dshield /etc/cron.hourly 755
+do_copy "$progdir"/../etc/cron.hourly/dshield /etc/cron.hourly 755
 # do_copy $progdir/../etc/mini-httpd.conf /etc/mini-httpd.conf 644
 # do_copy $progdir/../etc/default/mini-httpd /etc/default/mini-httpd 644
 
@@ -1362,12 +1364,12 @@ do_copy $progdir/../etc/cron.hourly/dshield /etc/cron.hourly 755
 
 dlog "removing old mini-httpd stuff"
 if [ -f /etc/mini-httpd.conf ] ; then
-   mv /etc/mini-httpd.conf /etc/mini-httpd.conf.${INSTDATE}
+   mv /etc/mini-httpd.conf /etc/mini-httpd.conf."${INSTDATE}"
 fi
 if [ -f /etc/default/mini-httpd ] ; then
    run 'update-rc.d mini-httpd disable'
    run 'update-rc.d -f mini-httpd remove'
-   mv /etc/default/mini-httpd /etc/default/.mini-httpd.${INSTDATE}
+   mv /etc/default/mini-httpd /etc/default/.mini-httpd."${INSTDATE}"
 fi
 
 ###########################################################
@@ -1409,7 +1411,7 @@ run 'apt-get -y -q install postfix'
 #
 
 dlog "installing /etc/motd"
-cat > $TMPDIR/motd <<EOF
+cat > "$TMPDIR"/motd <<EOF
 
 The programs included with the Debian GNU/Linux system are free software;
 the exact distribution terms for each program are described in the
@@ -1445,7 +1447,7 @@ GENCERT=1
 
 drun "ls ../etc/CA/certs/*.crt 2>/dev/null"
 
-if [ `ls ../etc/CA/certs/*.crt 2>/dev/null | wc -l ` -gt 0 ]; then
+if [ "$(ls ../etc/CA/certs/*.crt 2>/dev/null | wc -l)" -gt 0 ]; then
    dlog "CERTs may already be there, asking user"
    dialog --title 'Generating CERTs' --yesno "You may already have CERTs generated. Do you want me to re-generate CERTs and erase all existing ones?" 10 50
    response=$?
@@ -1482,7 +1484,7 @@ fi
 run 'mkdir /var/run/dshield'
 
 # rotate dshield firewall logs
-do_copy $progdir/../etc/logrotate.d/dshield /etc/logrotate.d 644
+do_copy "$progdir/../etc/logrotate.d/dshield /etc/logrotate.d 644"
 if [ -f "/etc/cron.daily/logrotate" ]; then
   run "mv /etc/cron.daily/logrotate /etc/cron.hourly"
 fi 
